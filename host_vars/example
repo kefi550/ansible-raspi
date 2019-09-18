@@ -1,0 +1,12 @@
+hostname: machine01
+users:
+  - name: dummyuser
+    password_sha1: 6a67c8f4c22bd6bc4959aae835cb642758701dde 
+    local_pub_key_path: "~/.ssh/id_rsa.pub"
+    group: dummygroup
+search_domains:
+  - example.com
+  - example.net
+nameservers:
+  - 8.8.8.8
+  - 8.8.4.4

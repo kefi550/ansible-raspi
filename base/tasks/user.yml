@@ -1,0 +1,68 @@
+---
+- name: create user
+  become: true
+  user:
+    name: "{{ user.name }}"
+    groups: adm,sudo
+    password: "{{ user.password_sha1 }}"
+    update_password: on_create
+    shell: /bin/bash
+
+- name: add sudoers
+  become: true
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regexp: "^{{ user.name }} "
+      line: "{{ user.name }} ALL=(ALL) NOPASSWD: ALL"
+
+# ssh config
+- block: 
+  - name: check authorized_keys
+    local_action: "command cat {{ user.local_pub_key_path }}"
+    register: key
+    changed_when: false
+
+  - name: create ~/.ssh
+    become: true
+    file:
+      path: "/home/{{ user.name }}/.ssh"
+      state: directory
+      owner: "{{ user.name }}"
+      group: "{{ user.group }}"
+      mode: '0700'
+
+  - name: insert authorized_keys for user
+    become: true
+    blockinfile:
+      path: "/home/{{ user.name }}/.ssh/authorized_keys"
+      owner: "{{ user.name }}"
+      group: "{{ user.group }}"
+      block: "{{ key.stdout }}"
+      create: yes
+      mode: '0600'
+
+  - name: restart sshd
+    become: true
+    systemd:
+      name: sshd
+      state: restarted
+
+  - name: set resolv.conf
+    become: true
+    lineinfile:
+      path: /etc/resolv.conf
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    with_items:
+      - regexp: "^domain "
+        line: "domain kefiwild.local"
+      - regexp: "^search "
+        line: "search kefiwild.local"
+      - regexp: '^nameserver 8\.8\.8\.8'
+        line: "nameserver 8.8.8.8"
+      - regexp: '^nameserver 8\.8\.4\.4'
+        line: "nameserver 8.8.4.4"

@@ -1,0 +1,7 @@
+[ubuntu]
+machine01 ansible_host=192.168.1.1 ansible_user=ubuntu # 初回実行時は初期ユーザを指定
+machine02 ansible_host=192.168.1.2 ansible_user=kefi550 # 初回実行以降は作成したユーザ
+
+[ubuntu:vars]
+default_user=ubuntu
+default_user_password=ubuntu
