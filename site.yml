@@ -3,3 +3,4 @@
   roles:
     - password_init
     - base
+    - dns

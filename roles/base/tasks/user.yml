@@ -50,30 +50,3 @@
     systemd:
       name: sshd
       state: restarted
-
-- name: set /etc/systemd/resolved.conf
-  become: true
-  lineinfile:
-    path: /etc/systemd/resolved.conf
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-  with_items:
-    - regexp: "(^|^#)Domains="
-      line: "Domains={{ search_domains | join(' ') }}"
-    - regexp: "(^|^#)DNS="
-      line: "DNS={{ nameservers | join(' ') }}"
-  register: resolved_conf
-
-- name: restart systemd-resolved
-  become: true
-  systemd:
-    state: restarted
-    name: systemd-resolved
-  when: resolved_conf.changed == true
-
-- name: enable systemd-resolved
-  become: true
-  systemd:
-    state: started
-    enabled: true
-    name: systemd-resolved
