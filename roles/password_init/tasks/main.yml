@@ -25,10 +25,9 @@
     command: ssh {{ ssh_args }} {{ default_user }}@{{ ansible_host }}
     timeout: 10
     responses:
-      (?i)password: "{{ default_user_password }}"
-      (?i)Current Password: "{{ default_user_password }}"
-      (?i)UNIX password: "{{ default_user_password }}"
-      (?i)New password: "{{ tmp_password }}"
+      "(?i)@.*password": "{{ default_user_password }}"
+      "(?i)Current Password": "{{ default_user_password }}"
+      "(?i)New password": "{{ tmp_password }}"
   register: change_password_result
   when:
     - ssh_result.skipped is not defined
@@ -41,20 +40,5 @@
     ansible_ssh_pass: "{{ tmp_password }}"
   when: change_password_result.skipped is not defined
 
-- name: change hostname
-  become: true
-  hostname:
-    name: "{{ hostname }}"
-
-- name: add /etc/hosts
-  become: true
-  lineinfile:
-    path: /etc/hosts
-    regexp: '^127\.0\.0\.1.*'
-    line: "127.0.0.1 localhost {{ hostname }}"
-
-- include: user.yml
-  with_items:
-    - "{{ users }}"
-  loop_control:
-    loop_var: user
+- name: reset connection
+  meta: reset_connection
