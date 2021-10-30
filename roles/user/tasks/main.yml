@@ -1,0 +1,16 @@
+---
+- include: user.yml
+  with_items:
+    - "{{ users }}"
+  loop_control:
+    loop_var: user
+
+- name: switch user
+  set_fact:
+    ansible_user: "{{ users[0].name }}"
+
+- name: delete default user
+  become: true
+  user:
+    name: "{{ default_user }}"
+    state: absent

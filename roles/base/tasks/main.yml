@@ -10,9 +10,3 @@
     path: /etc/hosts
     regexp: '^127\.0\.0\.1.*'
     line: "127.0.0.1 localhost {{ hostname }}"
-
-- include: user.yml
-  with_items:
-    - "{{ users }}"
-  loop_control:
-    loop_var: user

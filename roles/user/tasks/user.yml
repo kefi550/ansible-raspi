@@ -44,9 +44,3 @@
       block: "{{ key.stdout }}"
       create: yes
       mode: '0600'
-
-  - name: restart sshd
-    become: true
-    systemd:
-      name: sshd
-      state: restarted
