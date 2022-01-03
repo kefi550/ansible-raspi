@@ -4,9 +4,10 @@
   user:
     name: "{{ user.name }}"
     groups: adm,sudo
-    password: "{{ user.password_sha1 }}"
+    password: "{{ user.password_sha512 }}"
     update_password: on_create
     shell: /bin/bash
+  register: create_user_result
 
 - name: add sudoers
   become: true
@@ -17,7 +18,7 @@
     line: "{{ item.line }}"
   with_items:
     - regexp: "^{{ user.name }} "
-      line: "{{ user.name }} ALL=(ALL) NOPASSWD: ALL"
+      line: "{{ user.name }} ALL=(ALL) ALL"
 
 # ssh config
 - block: 

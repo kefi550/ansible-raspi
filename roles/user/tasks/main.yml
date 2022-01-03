@@ -14,3 +14,4 @@
   user:
     name: "{{ default_user }}"
     state: absent
+    force: true

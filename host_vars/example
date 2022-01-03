@@ -1,7 +1,7 @@
 hostname: machine01
 users:
   - name: dummyuser
-    password_sha1: 6a67c8f4c22bd6bc4959aae835cb642758701dde 
+    password_sha512: $6$c0fa18ik$COp1jh9Ca65sPKwVaI11SwCEj4X0bxbb8AzjJFxnAHCTp69TifStDtKSS0lDSDtgP3Oh4eTXmSLsekHxHdHT/0
     local_pub_key_path: "~/.ssh/id_rsa.pub"
     group: dummygroup
 search_domains:
