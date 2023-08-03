@@ -1,0 +1,27 @@
+---
+- name: configure netplan
+  template:
+    src: netplan_config.yaml.j2
+    dest: /etc/netplan/config.yaml
+  become: true
+  register: configure_netplan
+
+- name: netplan apply
+  block:
+    - name: netplan apply
+      become: true
+      command: netplan apply
+      async: 300
+      poll: 0
+      when: configure_netplan.changed
+      register: netplan_apply_result
+
+    - name: set ansible_host to static_ip
+      set_fact:
+        ansible_host: "{{ static_address }}"
+
+    - name: wait for connection to new ip
+      wait_for_connection:
+        delay: 10
+        timeout: 60
+      when: configure_netplan.changed

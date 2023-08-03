@@ -1,7 +1,75 @@
 - hosts: ubuntu
   gather_facts: no
-  roles:
-    - password_init
-    - base
-    - dns
-    - user
+  tasks:
+    - name: ping inventory_hostname
+      ping:
+      ignore_unreachable: true
+      register: ping_inventory_hostname
+
+    - name: ping to ip
+      block:
+        - name: set static_address, new_user
+          set_fact:
+            ansible_user: "{{ users[0].name }}"
+            ansible_host: "{{ static_address }}"
+          when:
+            - ping_inventory_hostname.unreachable is defined
+            - ping_inventory_hostname.unreachable == true
+
+        - name: ping static_ip
+          ping:
+          ignore_unreachable: true
+          register: ping_static_ip
+
+        # static_ip への pingが成功しなかったら、dhcp_ip, default_userを使う
+        - name: set dhcp_address, default_user
+          set_fact:
+            ansible_user: "{{ default_user }}"
+            ansible_password: "{{ default_user_password }}"
+            ansible_host: "{{ dhcp_address }}"
+          when:
+            - ping_static_ip.unreachable is defined
+            - ping_static_ip.unreachable == true
+
+        - name: ping dhcp_ip
+          ping:
+          become: true
+          become_user: "{{ default_user }}"
+          ignore_unreachable: true
+          register: ping_dhcp_ip
+          failed_when:
+            - ping_dhcp_ip.module_stderr is defined
+            - '"Your password has expired" not in ping_dhcp_ip.module_stderr'
+          when:
+            - ping_static_ip.unreachable is defined
+            - ping_static_ip.unreachable == true
+      when:
+        - ping_inventory_hostname.unreachable is defined
+        - ping_inventory_hostname.unreachable == true
+
+    - name: check password init is required
+      set_fact:
+        password_init_required: "{{ ping_dhcp_ip.module_stderr is defined and  'Your password has expired' in ping_dhcp_ip.module_stderr }}"
+                                
+
+    - name: password init
+      include_role:
+        name: password_init
+      vars:
+        password_init_host: "{{ ansible_host }}"
+        password_init_default_user: "{{ default_user }}"
+        password_init_default_user_password: "{{ default_user_password }}"
+      when:
+        password_init_required == true
+
+    - name: base
+      include_role:
+        name: base
+
+    - name: user
+      include_role:
+        name: user
+
+    - name: static_ip
+      include_role:
+        name: static_ip

@@ -9,6 +9,18 @@
   set_fact:
     ansible_user: "{{ users[0].name }}"
 
+- name: set become password
+  block:
+    - name: prompt for password of switched user
+      pause:
+        prompt: "Enter {{ users[0].name }}'s password'"
+      register: switched_users_password
+
+    - name: set password to ansible_password
+      set_fact:
+        ansible_become_password: "{{ switched_users_password.user_input }}"
+  when: ansible_become_password is not defined
+
 - name: delete default user
   become: true
   user:

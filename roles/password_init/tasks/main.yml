@@ -1,44 +1,19 @@
 ---
-- name: ping
-  ping:
-  ignore_unreachable: true
-  register: ping_result
-
-- name: check if initial login
-  delegate_to: 127.0.0.1
-  expect:
-    command: ssh {{ ssh_args }} {{ default_user }}@{{ ansible_host }}
-    responses:
-      (?i)Password: "{{ default_user_password }}"
-  register: ssh_result
-  changed_when: false
-  failed_when:
-    - "'You must change your password' not in ssh_result.stdout" 
-    - ssh_result.rc != 0
-  when:
-    - ping_result.unreachable is defined
-    - ping_result.unreachable == true
-
 - name: Change password on initial login
   delegate_to: 127.0.0.1
   expect:
-    command: ssh {{ ssh_args }} {{ default_user }}@{{ ansible_host }}
+    command: ssh {{ ssh_args }} {{ password_init_default_user }}@{{ password_init_host }}
     timeout: 10
     responses:
-      "(?i)@.*password": "{{ default_user_password }}"
-      "(?i)Current Password": "{{ default_user_password }}"
+      "(?i)@.*password": "{{ password_init_default_user_password }}"
+      "(?i)Current Password": "{{ password_init_default_user_password }}"
       "(?i)New password": "{{ tmp_password }}"
+      "(?i)Retypr new password": "{{ tmp_password }}"
   register: change_password_result
-  when:
-    - ssh_result.skipped is not defined
-    - '"You must change your password" in ssh_result.stdout'
-    - ping_result.unreachable is defined
-    - ping_result.unreachable == true
 
 - name: change ssh password
   set_fact:
     ansible_ssh_pass: "{{ tmp_password }}"
-  when: change_password_result.skipped is not defined
 
 - name: reset connection
   meta: reset_connection

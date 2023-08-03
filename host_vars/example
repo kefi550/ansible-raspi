@@ -1,12 +1,17 @@
 hostname: machine01
+dhcp_address: 192.168.0.100
+static_address: 10.0.0.100
+gateway_address: 10.0.0.1
+ip_prefix: 24
+dns:
+  nameservers:
+    - 10.0.0.1
+    - 8.8.8.8
+    - 8.8.4.4
+  search:
+    - example.com
 users:
-  - name: dummyuser
-    password_sha512: $6$c0fa18ik$COp1jh9Ca65sPKwVaI11SwCEj4X0bxbb8AzjJFxnAHCTp69TifStDtKSS0lDSDtgP3Oh4eTXmSLsekHxHdHT/0
+  - name: username
+    group: usergroup
+    password_sha512: $6$py4w57m0a5inWary$aJ9N/a630tPJY.3rR4/B9I8xc7UGnLOYYqcrfWmOq/tmvoI9pF6fA5AjZ9vEco13EE08pOzVaReEo/zFYXH741
     local_pub_key_path: "~/.ssh/id_rsa.pub"
-    group: dummygroup
-search_domains:
-  - example.com
-  - example.net
-nameservers:
-  - 8.8.8.8
-  - 8.8.4.4

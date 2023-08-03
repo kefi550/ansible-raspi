@@ -3,6 +3,27 @@
   become: true
   hostname:
     name: "{{ hostname }}"
+  register: change_hostname_result
+  ignore_errors: true
+
+- name: set sudo password
+  block:
+    - name: prompt for password of switched user
+      pause:
+        prompt: "Enter {{ users[0].name }}'s password'"
+      register: become_password
+
+    - name: set ansible_become_password
+      set_fact:
+        ansible_become_password:  "{{ become_password.user_input }}"
+
+    - name: change hostname
+      become: true
+      hostname:
+        name: "{{ hostname }}"
+  when:
+    - change_hostname_result.msg is defined
+    - '"Missing sudo password" in change_hostname_result.msg'
 
 - name: add /etc/hosts
   become: true
