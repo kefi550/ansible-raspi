@@ -27,3 +27,4 @@
     name: "{{ default_user }}"
     state: absent
     force: true
+  when: delete_default_user

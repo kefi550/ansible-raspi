@@ -1,4 +1,23 @@
 ---
+- name: install netplan
+  become: true
+  apt:
+    name: netplan.io
+    state: present
+
+- name: stop ifupdown
+  become: true
+  service:
+    name: ifupdown-pre.service
+    state: stopped
+    enabled: false
+
+- name: uninstall ifupdown
+  become: true
+  apt:
+    name: ifupdown
+    state: absent
+
 - name: configure netplan
   template:
     src: netplan_config.yaml.j2

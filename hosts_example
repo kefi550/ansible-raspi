@@ -1,7 +1,17 @@
 [ubuntu]
 machine01
+
+[raspbian]
 machine02
 
 [ubuntu:vars]
 default_user=ubuntu
 default_user_password=ubuntu
+
+[raspbian:vars]
+default_user=pi
+default_user_password=raspberry
+
+[linux:children]
+ubuntu
+raspbian

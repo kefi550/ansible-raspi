@@ -1,4 +1,4 @@
-- hosts: ubuntu
+- hosts: linux
   gather_facts: no
   tasks:
     - name: ping inventory_hostname
